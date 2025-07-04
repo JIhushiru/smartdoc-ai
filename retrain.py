@@ -5,6 +5,7 @@ import csv
 
 EMBEDDING_STORE_PATH = "app/model/embedding_store.joblib"
 
+
 def load_feedback(log_path="logs/feedback.csv"):
     texts, labels = [], []
     if not os.path.exists(log_path):
@@ -17,6 +18,7 @@ def load_feedback(log_path="logs/feedback.csv"):
                 labels.append(row[2])
     return texts, labels
 
+
 def rebuild_embedding_store():
     texts, labels = load_feedback()
     if not texts:
@@ -27,6 +29,7 @@ def rebuild_embedding_store():
     os.makedirs("app/model", exist_ok=True)
     joblib.dump({"embeddings": embeddings, "labels": labels}, EMBEDDING_STORE_PATH)
     print(f"Rebuilt embedding store from {len(texts)} feedback entries.")
+
 
 if __name__ == "__main__":
     rebuild_embedding_store()

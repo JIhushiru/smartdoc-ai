@@ -3,6 +3,7 @@ from app.utils import extract_text, log_classification
 from app.classify import classify_text
 from fastapi import Form
 import os, csv
+from retrain import rebuild_embedding_store
 
 app = FastAPI()
 
@@ -17,6 +18,7 @@ async def submit_feedback(
     with open("logs/feedback.csv", "a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow([text[:200], predicted_label, correct_label])
+    rebuild_embedding_store()
     return {"message": "Feedback saved. Thanks"}
 
 
