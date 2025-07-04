@@ -24,6 +24,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest
+        
+    - name: Rebuild embedding store before tests
+      run: python retrain.py
 
     - name: Run Pytest
       env:

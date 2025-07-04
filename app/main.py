@@ -8,16 +8,21 @@ from retrain import rebuild_embedding_store
 app = FastAPI()
 
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN")
+
+
 def verify_token(token: str = ""):
     if token != ADMIN_TOKEN:
         raise HTTPException(status_code=403, detail="Forbidden")
+
 
 @app.post("/retrain")
 def retrain_endpoint(token: str = Form(...)):
     verify_token(token)
     from retrain import rebuild_embedding_store
+
     rebuild_embedding_store()
-    return {"message":"Embedding store updated from feedback."}
+    return {"message": "Embedding store updated from feedback."}
+
 
 @app.post("/feedback")
 async def submit_feedback(
