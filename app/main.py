@@ -76,7 +76,7 @@ async def classify_document(file: UploadFile = File(...)):
         doc_type, confidence = classify_text(text)
         log_classification(text, doc_type, confidence)
 
-        return {"document_type": doc_type, "confidence": confidence}
+        return {"document_type": doc_type, "confidence": confidence, "text": text}
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

@@ -7,11 +7,49 @@ export default function SmartDocClassifier() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{document_type: string, confidence: number} | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const [showCorrection, setShowCorrection] = useState(false);
+  const [correction, setCorrection] = useState("");
+  const [fullText, setFullText] = useState("");
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFile(e.target.files?.[0] || null);
-    setResult(null);
-  };
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFile(e.target.files?.[0] || null);
+        setResult(null);
+        setFeedbackSubmitted(false);
+    };
+
+    const handleFeedbackCorrect = async () => {
+    if (!result) return;
+
+    await fetch("http://localhost:8000/feedback", {
+        method: "POST",
+        body: new URLSearchParams({
+        text: fullText,
+        predicted_label: result.document_type,
+        correct_label: result.document_type,
+        }),
+    });
+    setFeedbackSubmitted(true);
+    alert("Thanks for your feedback!");
+    };
+
+    const handleSubmitCorrection = async () => {
+    if (!result || !correction) return;
+
+    await fetch("http://localhost:8000/feedback", {
+        method: "POST",
+        body: new URLSearchParams({
+        text: fullText,
+        predicted_label: result.document_type,
+        correct_label: correction,
+        }),
+    });
+
+    alert("Thanks! We'll use your correction to improve.");
+    setShowCorrection(false);
+    setCorrection("");
+    };
+
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -40,6 +78,7 @@ export default function SmartDocClassifier() {
 
       const data = await res.json();
       setResult(data);
+      setFullText(data.text);
     } catch (err) {
       alert("Error uploading file.");
     } finally {
@@ -150,6 +189,7 @@ export default function SmartDocClassifier() {
 
           {/* Results Display */}
           {result && (
+            <>
             <div className="mt-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border border-green-200">
               <div className="flex items-center space-x-3 mb-4">
                 <CheckCircle className="w-6 h-6 text-green-600" />
@@ -182,6 +222,48 @@ export default function SmartDocClassifier() {
                 </div>
               </div>
             </div>
+                {/* Feedback Section */}
+                <div className="mt-6">
+                <p className="text-sm font-medium text-gray-700 mb-2">
+                    Was this classification correct?
+                </p>
+
+                {!showCorrection ? (
+                    <div className="flex gap-3">
+                    <button
+                        onClick={handleFeedbackCorrect}
+                        disabled={feedbackSubmitted}
+                        className={!feedbackSubmitted ?"px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700 transition": ""}
+                    >
+                        Yes
+                    </button>
+                    <button
+                        onClick={() => setShowCorrection(true)}
+                        className="px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 transition"
+                    >
+                        No
+                    </button>
+                    </div>
+                ) : (
+                    <div className="space-y-3 mt-3">
+                    <input
+                        type="text"
+                        placeholder="Enter correct label"
+                        className="w-full p-2 border rounded-xl"
+                        value={correction}
+                        onChange={(e) => setCorrection(e.target.value)}
+                    />
+                    <button
+                        onClick={handleSubmitCorrection}
+                        disabled={!correction}
+                        className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50"
+                    >
+                        Submit Correction
+                    </button>
+                    </div>
+                )}
+                </div>
+            </>
           )}
         </div>
       </div>
