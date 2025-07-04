@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+pdfplumber
+python-docx
+pytesseract
+pillow
+scikit-learn
+joblib
