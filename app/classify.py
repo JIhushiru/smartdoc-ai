@@ -1,25 +1,24 @@
-import csv
 import numpy as np
 from app.utils import get_embedding
 from sklearn.metrics.pairwise import cosine_similarity
+import os, joblib
+
+EMBEDDING_STORE_PATH = "app/model/embedding_store.joblib"
 
 
-def classify_text(text: str):
-    query_vec = np.array(get_embedding(text)).reshape(1, -1)
+def classify_text(text):
+    # Generate embedding for new input
+    new_embedding = np.array(get_embedding(text)).reshape(1, -1)
 
-    with open("data/embeddings.csv", "r", encoding="utf-8") as f:
-        reader = csv.reader(f)
-        rows = list(reader)
+    # Load existing embeddings and labels
+    if not os.path.exists(EMBEDDING_STORE_PATH):
+        raise ValueError("Embedding store not found. Retrain model first.")
 
-    best_score = -1
-    best_label = "unknown"
+    data = joblib.load(EMBEDDING_STORE_PATH)
+    existing_embeddings = np.array(data["embeddings"])
+    labels = data["labels"]
 
-    for row in rows:
-        doc_text, label, *vec_strs = row
-        vec = np.array([float(v) for v in vec_strs]).reshape(1, -1)
-        score = cosine_similarity(query_vec, vec)[0][0]
-        if score > best_score:
-            best_score = score
-            best_label = label
-
-    return best_label, float(best_score)
+    # Compute cosine similarity
+    similarities = cosine_similarity(new_embedding, existing_embeddings)[0]
+    best_idx = np.argmax(similarities)
+    return labels[best_idx], float(similarities[best_idx])

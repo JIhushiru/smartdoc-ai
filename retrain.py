@@ -1,24 +1,32 @@
-import csv
-import os
 from app.utils import get_embedding
+import joblib, os
+import numpy as np
+import csv
 
-os.makedirs("data", exist_ok=True)
+EMBEDDING_STORE_PATH = "app/model/embedding_store.joblib"
 
-feedback_path = "logs/feedback.csv"
-output_path = "data/embeddings.csv"
+def load_feedback(log_path="logs/feedback.csv"):
+    texts, labels = [], []
+    if not os.path.exists(log_path):
+        return texts, labels
+    with open(log_path, "r", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        for row in reader:
+            if len(row) == 3:
+                texts.append(row[0])
+                labels.append(row[2])
+    return texts, labels
 
-if not os.path.exists(feedback_path):
-    print("No feedback found.")
-    exit()
+def rebuild_embedding_store():
+    texts, labels = load_feedback()
+    if not texts:
+        print("No feedback available.")
+        return
 
-with open(feedback_path, "r", encoding="utf-8") as f:
-    reader = csv.reader(f)
-    rows = list(reader)
+    embeddings = [get_embedding(text) for text in texts]
+    os.makedirs("app/model", exist_ok=True)
+    joblib.dump({"embeddings": embeddings, "labels": labels}, EMBEDDING_STORE_PATH)
+    print(f"Rebuilt embedding store from {len(texts)} feedback entries.")
 
-with open(output_path, "w", newline="", encoding="utf-8") as f:
-    writer = csv.writer(f)
-    for text, _, correct_label in rows:
-        vec = get_embedding(text)
-        writer.writerow([text, correct_label] + vec)
-
-print(f"Rebuilt embedding store from {len(rows)} feedback entries.")
+if __name__ == "__main__":
+    rebuild_embedding_store()

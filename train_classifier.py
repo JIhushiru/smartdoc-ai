@@ -1,3 +1,4 @@
+import os
 import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
@@ -67,6 +68,7 @@ pipeline.fit(X_train, y_train)
 # Evaluate
 y_pred = pipeline.predict(X_test)
 print(classification_report(y_test, y_pred))
+os.makedirs("models", exist_ok=True)
 
 # Save the model and vectorizer
 joblib.dump(pipeline.named_steps["classifier"], "models/classifier.pkl")
