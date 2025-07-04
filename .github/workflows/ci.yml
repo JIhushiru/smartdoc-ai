@@ -29,3 +29,11 @@ jobs:
       env:
         PYTHONPATH: .
       run: pytest
+    - name: Lint code
+      run: |
+        pip install flake8
+        flake8 app --ignore=E501,W503
+    - name: Check formatting with Black
+      run: |
+        pip install black
+        black --check .

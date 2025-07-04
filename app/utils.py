@@ -9,11 +9,17 @@ import openai
 from dotenv import load_dotenv
 
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")
+openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT") 
+openai.api_type = "azure"
+openai.api_version = "2024-12-01-preview" 
+DEPLOYMENT_NAME = os.getenv("AZURE_DEPLOYMENT_NAME") 
 
-
-def get_embedding(text: str) -> list[float]:
-    response = openai.embeddings.create(input=[text], model="text-embedding-3-small")
+def get_embedding(text: str) -> list:
+    response = openai.embeddings.create(
+        input=[text],
+        model=DEPLOYMENT_NAME
+    )
     return response.data[0].embedding
 
 
