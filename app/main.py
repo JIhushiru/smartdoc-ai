@@ -5,6 +5,7 @@ from fastapi import Form
 import os
 import csv
 from retrain import rebuild_embedding_store
+from fastapi.middleware.cors import CORSMiddleware
 
 tags_metadata = [
     {
@@ -31,6 +32,13 @@ app = FastAPI(
 
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def verify_token(token: str = ""):
     if token != ADMIN_TOKEN:
