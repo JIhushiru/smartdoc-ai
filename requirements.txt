@@ -7,3 +7,5 @@ pillow
 scikit-learn
 joblib
 python-multipart
+httpx
+pytest

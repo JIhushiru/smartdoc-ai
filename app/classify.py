@@ -1,5 +1,6 @@
-import joblib 
+import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
+
 
 def classify_text(text: str) -> tuple[str, float]:
     model = joblib.load("models/classifier.pkl")
