@@ -6,7 +6,28 @@ import os
 import csv
 from retrain import rebuild_embedding_store
 
-app = FastAPI()
+tags_metadata = [
+    {
+        "name": "Classification",
+        "description": "Classify a document (PDF) into known types using embeddings.",
+    },
+    {
+        "name": "Feedback",
+        "description": "Submit corrections to improve the model.",
+    },
+    {
+        "name": "Admin",
+        "description": "Admin-only operations like retraining the model.",
+    },
+]
+
+
+app = FastAPI(
+    title="SmartDocAI API",
+    description="Classify resumes, invoices, etc. using AI-powered embeddings.",
+    version="1.0.0",
+    openapi_tags=tags_metadata,
+)
 
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN")
 
@@ -16,7 +37,7 @@ def verify_token(token: str = ""):
         raise HTTPException(status_code=403, detail="Forbidden")
 
 
-@app.post("/retrain")
+@app.post("/retrain/", tags=["Admin"])
 def retrain_endpoint(token: str = Form(...)):
     verify_token(token)
     from retrain import rebuild_embedding_store
@@ -25,7 +46,7 @@ def retrain_endpoint(token: str = Form(...)):
     return {"message": "Embedding store updated from feedback."}
 
 
-@app.post("/feedback")
+@app.post("/feedback", tags=["Feedback"])
 async def submit_feedback(
     text: str = Form(...),
     predicted_label: str = Form(...),
@@ -39,7 +60,7 @@ async def submit_feedback(
     return {"message": "Feedback saved. Thanks"}
 
 
-@app.post("/classify/")
+@app.post("/classify/", tags=["Classification"])
 async def classify_document(file: UploadFile = File(...)):
     try:
         contents = await file.read()
