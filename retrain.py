@@ -1,5 +1,6 @@
 from app.utils import get_embedding
-import joblib, os
+import joblib
+import os
 import numpy as np
 import csv
 
@@ -27,7 +28,8 @@ def rebuild_embedding_store():
 
     embeddings = [get_embedding(text) for text in texts]
     os.makedirs("app/model", exist_ok=True)
-    joblib.dump({"embeddings": embeddings, "labels": labels}, EMBEDDING_STORE_PATH)
+    joblib.dump({"embeddings": embeddings, "labels": labels},
+                EMBEDDING_STORE_PATH)
     print(f"Rebuilt embedding store from {len(texts)} feedback entries.")
 
 

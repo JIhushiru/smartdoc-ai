@@ -2,7 +2,8 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from app.utils import extract_text, log_classification
 from app.classify import classify_text
 from fastapi import Form
-import os, csv
+import os
+import csv
 from retrain import rebuild_embedding_store
 
 app = FastAPI()

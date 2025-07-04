@@ -1,7 +1,8 @@
 import numpy as np
 from app.utils import get_embedding
 from sklearn.metrics.pairwise import cosine_similarity
-import os, joblib
+import os
+import joblib
 
 EMBEDDING_STORE_PATH = "app/model/embedding_store.joblib"
 
