@@ -16,21 +16,34 @@ export default function SmartDocClassifier() {
         setFile(e.target.files?.[0] || null);
         setResult(null);
         setFeedbackSubmitted(false);
+        setShowCorrection(false);
+        setCorrection("");
     };
 
     const handleFeedbackCorrect = async () => {
     if (!result) return;
 
-    await fetch("http://localhost:8000/feedback", {
+    try {
+        const res = await fetch("http://localhost:8000/feedback", {
         method: "POST",
         body: new URLSearchParams({
-        text: fullText,
-        predicted_label: result.document_type,
-        correct_label: result.document_type,
+            text: fullText,
+            predicted_label: result.document_type,
+            correct_label: result.document_type,
         }),
-    });
-    setFeedbackSubmitted(true);
-    alert("Thanks for your feedback!");
+        });
+
+        if (!res.ok) {
+        const errorData = await res.json();
+        alert(errorData.detail || "Error submitting feedback.");
+        return;
+        }
+
+        setFeedbackSubmitted(true);
+        alert("Thanks for your feedback!");
+    } catch (err) {
+        alert("Network error.");
+    }
     };
 
     const handleSubmitCorrection = async () => {
@@ -58,12 +71,19 @@ export default function SmartDocClassifier() {
     if (droppedFile && droppedFile.type === 'application/pdf') {
       setFile(droppedFile);
       setResult(null);
+      setFeedbackSubmitted(false);
+      setShowCorrection(false);
+      setCorrection("");
     }
   };
 
   const handleUpload = async () => {
     if (!file) return;
     setLoading(true);
+    setResult(null);
+    setFeedbackSubmitted(false);
+    setShowCorrection(false);
+    setCorrection("");
 
     const formData = new FormData();
     formData.append("file", file);
@@ -233,13 +253,13 @@ export default function SmartDocClassifier() {
                     <button
                         onClick={handleFeedbackCorrect}
                         disabled={feedbackSubmitted}
-                        className={!feedbackSubmitted ?"px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700 transition": ""}
+                        className="px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700 transition disabled:opacity-50"
                     >
                         Yes
                     </button>
                     <button
                         onClick={() => setShowCorrection(true)}
-                        className="px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 transition"
+                        className="px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 transition disabled:opacity-50"
                     >
                         No
                     </button>

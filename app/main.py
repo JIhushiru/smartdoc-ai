@@ -6,6 +6,7 @@ import os
 import csv
 from retrain import rebuild_embedding_store
 from fastapi.middleware.cors import CORSMiddleware
+import hashlib
 
 tags_metadata = [
     {
@@ -40,9 +41,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 def verify_token(token: str = ""):
     if token != ADMIN_TOKEN:
         raise HTTPException(status_code=403, detail="Forbidden")
+
+
+def hash_text(text: str) -> str:
+    return hashlib.sha256(text[:200].encode("utf-8")).hexdigest()
+
+
+def feedback_hash_exists(new_hash: str, log_path="logs/feedback.csv") -> bool:
+    if not os.path.exists(log_path):
+        return False
+    with open(log_path, "r", encoding="utf-8") as f:
+        for row in csv.reader(f):
+            if len(row) == 4 and row[3] == new_hash:
+                return True
+    return False
 
 
 @app.post("/retrain/", tags=["Admin"])
@@ -61,9 +77,13 @@ async def submit_feedback(
     correct_label: str = Form(...),
 ):
     os.makedirs("logs", exist_ok=True)
+    text_hash = hashlib.sha256(text[:200].encode("utf-8")).hexdigest()
+
+    if feedback_hash_exists(text_hash):
+        raise HTTPException(status_code=400, detail="Duplicate feedback detected.")
     with open("logs/feedback.csv", "a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow([text[:200], predicted_label, correct_label])
+        writer.writerow([text[:200], predicted_label, correct_label, text_hash])
     rebuild_embedding_store()
     return {"message": "Feedback saved. Thanks"}
 
