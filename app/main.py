@@ -1,8 +1,23 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from app.utils import extract_text, log_classification
 from app.classify import classify_text
+from fastapi import Form
+import os, csv
 
 app = FastAPI()
+
+
+@app.post("/feedback")
+async def submit_feedback(
+    text: str = Form(...),
+    predicted_label: str = Form(...),
+    correct_label: str = Form(...),
+):
+    os.makedirs("logs", exist_ok=True)
+    with open("logs/feedback.csv", "a", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow([text[:200], predicted_label, correct_label])
+    return {"message": "Feedback saved. Thanks"}
 
 
 @app.post("/classify/")

@@ -39,4 +39,4 @@ def log_classification(text: str, label: str, confidence: float):
     log_path = "logs/classifications.csv"
     with open(log_path, "a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow([text[:200], label, confidence])
+        writer.writerow([text[:200], predicted_label, correct_label])
