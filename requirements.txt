@@ -6,3 +6,4 @@ pytesseract
 pillow
 scikit-learn
 joblib
+python-multipart
