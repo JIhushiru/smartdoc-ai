@@ -5,6 +5,16 @@ from PIL import Image
 import io
 import os
 import csv
+import openai
+from dotenv import load_dotenv
+
+load_dotenv()
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+
+def get_embedding(text: str) -> list[float]:
+    response = openai.embeddings.create(input=[text], model="text-embedding-3-small")
+    return response.data[0].embedding
 
 
 def extract_text(filename: str, content: bytes) -> str:
@@ -39,4 +49,4 @@ def log_classification(text: str, label: str, confidence: float):
     log_path = "logs/classifications.csv"
     with open(log_path, "a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow([text[:200], predicted_label, correct_label])
+        writer.writerow([text[:200], label, confidence])
