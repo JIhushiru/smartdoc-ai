@@ -1,39 +1,54 @@
 import { useState } from 'react';
 import { fetchStatus, triggerRetrain } from "../services/adminService";
 
-export default function AdminPanel() {
-  const [status, setStatus] = useState<any>(null);
+interface AdminPanelProps {
+  onBack: () => void;
+}
+
+interface StatusData {
+  count: number;
+  last_entry: string;
+}
+
+export default function AdminPanel({ onBack }: AdminPanelProps) {
+  const [status, setStatus] = useState<StatusData | null>(null);
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState('');
 
-    const handleFetchStatus = async () => {
+  const handleFetchStatus = async () => {
     try {
-        const data = await fetchStatus(token);
-        setStatus(data);
+      const data = await fetchStatus(token);
+      setStatus(data);
     } catch (err) {
-        alert("Failed to fetch status. Check your token.");
-        setStatus(null);
+      alert("Failed to fetch status. Check your token.");
+      setStatus(null);
     }
-    };
+  };
 
-
-    const handleRetrain = async () => {
-      try {
-        setLoading(true);
-        const data = await triggerRetrain(token);
-        alert(data.message);
-        handleFetchStatus();
-      } catch (err) {
-        alert("Retrain failed. Check your token.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
+  const handleRetrain = async () => {
+    try {
+      setLoading(true);
+      const data = await triggerRetrain(token);
+      alert(data.message);
+      handleFetchStatus();
+    } catch (err) {
+      alert("Retrain failed. Check your token.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-xl mx-auto p-6 mt-10 bg-white shadow rounded-xl space-y-6">
-      <h2 className="text-2xl font-bold">Admin Panel</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Admin Panel</h2>
+        <button
+          onClick={onBack}
+          className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+        >
+          ← Back
+        </button>
+      </div>
 
       <input
         type="password"
