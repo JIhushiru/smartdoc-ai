@@ -36,7 +36,7 @@ ADMIN_TOKEN = os.getenv("ADMIN_TOKEN")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://smartdoc-ai-kappa.vercel.app", "http://localhost:5173/"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
