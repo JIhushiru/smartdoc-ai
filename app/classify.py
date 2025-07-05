@@ -1,4 +1,5 @@
 import numpy as np
+from app.template_manager import detect_template
 from app.utils import get_embedding
 from sklearn.metrics.pairwise import cosine_similarity
 import os
@@ -28,4 +29,11 @@ def classify_text(text):
 
     similarities = cosine_similarity(embedding, existing_embeddings)[0]
     best_idx = np.argmax(similarities)
-    return labels[best_idx], float(similarities[best_idx])
+    confidence = float(similarities[best_idx])
+
+    if confidence < 0.7:
+        template_guess = detect_template(text)
+        if template_guess:
+            return template_guess, confidence
+
+    return labels[best_idx], confidence
