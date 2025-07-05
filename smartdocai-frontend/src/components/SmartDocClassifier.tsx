@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { Upload, FileText, CheckCircle, Loader2, Sparkles } from 'lucide-react';
+import { classifyDocument, submitFeedback } from '../services/documentService';
 
 export default function SmartDocClassifier() {
   const [file, setFile] = useState<File | null>(null);
@@ -21,47 +22,29 @@ export default function SmartDocClassifier() {
     };
 
     const handleFeedbackCorrect = async () => {
-    if (!result) return;
-
-    try {
-        const res = await fetch("http://localhost:8000/feedback", {
-        method: "POST",
-        body: new URLSearchParams({
-            text: fullText,
-            predicted_label: result.document_type,
-            correct_label: result.document_type,
-        }),
-        });
-
-        if (!res.ok) {
-        const errorData = await res.json();
-        alert(errorData.detail || "Error submitting feedback.");
-        return;
-        }
-
+      if (!result) return;
+      try {
+        await submitFeedback(fullText, result.document_type, result.document_type);
         setFeedbackSubmitted(true);
         alert("Thanks for your feedback!");
-    } catch (err) {
-        alert("Network error.");
-    }
+      } catch (err: any) {
+        alert(err.message || "Error submitting feedback.");
+      }
     };
+
 
     const handleSubmitCorrection = async () => {
-    if (!result || !correction) return;
-
-    await fetch("http://localhost:8000/feedback", {
-        method: "POST",
-        body: new URLSearchParams({
-        text: fullText,
-        predicted_label: result.document_type,
-        correct_label: correction,
-        }),
-    });
-
-    alert("Thanks! We'll use your correction to improve.");
-    setShowCorrection(false);
-    setCorrection("");
+      if (!result || !correction) return;
+      try {
+        await submitFeedback(fullText, result.document_type, correction);
+        alert("Thanks! We'll use your correction to improve.");
+        setShowCorrection(false);
+        setCorrection("");
+      } catch (err: any) {
+        alert(err.message || "Error submitting correction.");
+      }
     };
+
 
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -85,18 +68,8 @@ export default function SmartDocClassifier() {
     setShowCorrection(false);
     setCorrection("");
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const res = await fetch("http://localhost:8000/classify/", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) throw new Error("Failed to classify document");
-
-      const data = await res.json();
+      const data = await classifyDocument(file);
       setResult(data);
       setFullText(data.text);
     } catch (err) {
@@ -105,6 +78,7 @@ export default function SmartDocClassifier() {
       setLoading(false);
     }
   };
+
 
  return (
     <div className="w-full min-h-screen bg-gradient-to-br from-slate-300 via-gray-400 to-gray-700 flex items-center justify-center p-4">

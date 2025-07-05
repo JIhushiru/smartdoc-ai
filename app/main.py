@@ -7,6 +7,7 @@ import csv
 from retrain import rebuild_embedding_store
 from fastapi.middleware.cors import CORSMiddleware
 import hashlib
+import datetime
 
 tags_metadata = [
     {
@@ -59,6 +60,24 @@ def feedback_hash_exists(new_hash: str, log_path="logs/feedback.csv") -> bool:
             if len(row) == 4 and row[3] == new_hash:
                 return True
     return False
+
+def get_feedback_stats(log_path="logs/feedback.csv"):
+    if not os.path.exists(log_path):
+        return {"count": 0, "last_entry":None}
+    with open(log_path, "r", encoding="utf-8") as f:
+        rows = list(csv.reader(f))
+        count = len(rows)
+        last_time = os.path.getmtime(log_path)
+        return {
+            "count": count,
+            "last_entry": datetime.datetime.fromtimestamp(last_time).isoformat()
+        }
+
+@app.get("/status", tags=["Admin"])
+def status_endpoint(token: str = ""):
+    verify_token(token)
+    stats = get_feedback_stats()
+    return {"message": "Model status", **stats}
 
 
 @app.post("/retrain/", tags=["Admin"])
