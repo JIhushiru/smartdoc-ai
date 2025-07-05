@@ -1,5 +1,7 @@
+import { API_BASE } from "./api";
+
 export async function fetchStatus(token: string) {
-  const res = await fetch(`http://localhost:8000/status?token=${token}`);
+  const res = await fetch(`${API_BASE}/status?token=${token}`);
   if (!res.ok) {
     throw new Error("Invalid token or failed to fetch status.");
   }
@@ -7,7 +9,7 @@ export async function fetchStatus(token: string) {
 }
 
 export async function triggerRetrain(token: string) {
-  const res = await fetch("http://localhost:8000/retrain/", {
+  const res = await fetch(`${API_BASE}retrain/`, {
     method: "POST",
     body: new URLSearchParams({ token }),
   });
