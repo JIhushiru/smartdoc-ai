@@ -7,6 +7,7 @@ import joblib
 EMBEDDING_STORE_PATH = "app/model/embedding_store.joblib"
 CLASSIFIER_PATH = "app/model/classifier.joblib"
 
+
 def classify_text(text):
     embedding = np.array(get_embedding(text)).reshape(1, -1)
 
@@ -16,7 +17,7 @@ def classify_text(text):
         pred = clf.predict(embedding)[0]
         prob = max(clf.predict_proba(embedding)[0])
         return pred, float(prob)
-    
+
     # Fallback to cosine similarity
     if not os.path.exists(EMBEDDING_STORE_PATH):
         raise ValueError("No classifier or embedding store found. Please retrain.")

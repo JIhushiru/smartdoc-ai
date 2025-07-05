@@ -81,10 +81,16 @@ async def submit_feedback(
 
     if feedback_hash_exists(text_hash):
         raise HTTPException(status_code=400, detail="Duplicate feedback detected.")
+    
     with open("logs/feedback.csv", "a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow([text[:200], predicted_label, correct_label, text_hash])
-    rebuild_embedding_store()
+
+    # Auto retrain if classifier is missing
+    if not os.path.exists("app/model/classifier.joblib"):
+        print("Classifier not found. Triggering retrain...")
+        rebuild_embedding_store()
+        
     return {"message": "Feedback saved. Thanks"}
 
 

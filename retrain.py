@@ -7,6 +7,7 @@ import csv
 EMBEDDING_STORE_PATH = "app/model/embedding_store.joblib"
 CLASSIFIER_PATH = "app/model/classifier.joblib"
 
+
 def load_feedback(log_path="logs/feedback.csv"):
     texts, labels = [], []
     if not os.path.exists(log_path):
@@ -31,7 +32,7 @@ def rebuild_embedding_store():
 
     joblib.dump({"embeddings": embeddings, "labels": labels}, EMBEDDING_STORE_PATH)
 
-    #Train logistic regression classifier
+    # Train logistic regression classifier
     clf = LogisticRegression(max_iter=1000)
     clf.fit(embeddings, labels)
     joblib.dump(clf, CLASSIFIER_PATH)
