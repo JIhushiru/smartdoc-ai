@@ -1,5 +1,3 @@
-import re
-
 TEMPLATE_KEYWORDS = {
     "invoice": ["invoice number", "billing address", "total due"],
     "resume": ["education", "experience", "skills"],

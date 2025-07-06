@@ -61,17 +61,19 @@ def feedback_hash_exists(new_hash: str, log_path="logs/feedback.csv") -> bool:
                 return True
     return False
 
+
 def get_feedback_stats(log_path="logs/feedback.csv"):
     if not os.path.exists(log_path):
-        return {"count": 0, "last_entry":None}
+        return {"count": 0, "last_entry": None}
     with open(log_path, "r", encoding="utf-8") as f:
         rows = list(csv.reader(f))
         count = len(rows)
         last_time = os.path.getmtime(log_path)
         return {
             "count": count,
-            "last_entry": datetime.datetime.fromtimestamp(last_time).isoformat()
+            "last_entry": datetime.datetime.fromtimestamp(last_time).isoformat(),
         }
+
 
 @app.get("/status", tags=["Admin"])
 def status_endpoint(token: str = ""):

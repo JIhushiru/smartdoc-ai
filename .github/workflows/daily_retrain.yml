@@ -2,7 +2,7 @@ name: Daily Retrain Embeddings
 
 on:
   schedule:
-    - cron: "0 3 * * *"  # Every day at 3 AM UTC
+    - cron: "0 3 * * *"  # Every day at 11 AM Ph Time
   workflow_dispatch:
 
 jobs:
